@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <a href="/insert">추가</a>
+    <a href="/update">수정</a>
+    <a href="/delete">삭제</a>
+    <a href="/select">조회</a>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+    <fieldset style="width:700px">
+        <legend>데이터 추가하기</legend><br />
+        <%# 데이터 전달을 위해 form으로 감싸고 name 부여 %>
+        <form action="/insert" method="post">
+            아이디 : <input type="text" name="userid" placeholder="아이디 입력"/><br /><br />
+            이름 : <input type="text" name="username" placeholder="이름 입력"/><br /><br />
+            나이 : <input type="text" name="userage" placeholder="나이 입력"/><br /><br />
+            연락처 : <input type="text" name="userphone" placeholder="연락처 입력"/><br />
+            <div align="right">
+                <input type="submit" value="추가하기" />
+            </div>
+        </form>
+    </fieldset>
+  </body>
+</html>
