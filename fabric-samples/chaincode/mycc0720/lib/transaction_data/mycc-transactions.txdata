@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "myccExists",
+        "transactionLabel": "A test myccExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createMycc",
+        "transactionLabel": "A test createMycc transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readMycc",
+        "transactionLabel": "A test readMycc transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updateMycc",
+        "transactionLabel": "A test updateMycc transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deleteMycc",
+        "transactionLabel": "A test deleteMycc transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]
