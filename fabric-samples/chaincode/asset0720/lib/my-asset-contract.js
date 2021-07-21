@@ -52,6 +52,37 @@ class MyAssetContract extends Contract {
         return allResults;
     }
 
+    async UpdateAsset(ctx, key, color){
+        const buf = await ctx.stub.getState(key); //키값 가져오기
+        if(!buf || buf.length === 0){ // 버프 안에 값이 없거나 길이가 0일때
+            //오류 처리 자동적으로 실행 종료
+            throw new Error(`${key}가 없습니다.`);
+        }
+        var str = buf.toString(); // bueffer -> string
+        var obj = JSON.parse(str); // String -> object
+        obj['Color']=color;
+
+        var str1 = JSON.stringify(obj); // object -> string
+        var buf1 = Buffer.from(str1); // String -> buffer
+
+        await ctx.stub.putState(key, buf1);
+
+
+
+    }
+    
+    async DeleteAsset(ctx, key){
+                // key에 해당하는 정보 조회(존재하지 않는 값 제거시 오류 발생 가능)
+                const buf = await ctx.stub.getState(key); //키값 가져오기
+                if(!buf || buf.length === 0){ // 버프 안에 값이 없거나 길이가 0일때
+                    //오류 처리 자동적으로 실행 종료
+                    throw new Error(`${key}가 없습니다.`);
+                }
+        
+                await ctx.stub.deleteState(key);
+        
+    }
+
 }
 
 module.exports = MyAssetContract;
