@@ -8,6 +8,60 @@ const { Contract } = require('fabric-contract-api');
 
 class MycarContract extends Contract {
 
+
+    //{"selector":{"make":"Hyundai"}}
+    //query => {"make":"Ford"}
+    //query => [{"make":"Ford", "owner":"Tom"}]
+    async readQuerySelector(ctx, query){
+        var queryString = {}
+        queryString.selector = JSON.parse(query) // {"selecctor" : { 전달된 조건 }}
+
+         //object -> string 변환해서 호출
+         const str = JSON.stringify(queryString);
+         const iterator = await ctx.stub.getQueryResult(str);
+ 
+         var allResults = []; // 전체 내용 보관
+         // 반복자
+         let res = await iterator.next(); // 1개 가져오기
+         while (!res.done){
+             if(res.value){ // 가져온 내용에 정보가 있는지 확인
+                 console.log(res.value);
+                 const str = res.value.value.toString(); // buffer -> stirng
+                 const obj = JSON.parse(str); // string -> object
+                 allResults.push(obj);
+ 
+             }
+             res = await iterator.next();
+         }
+ 
+         await iterator.close();
+         return allResults;
+
+    }
+
+    async deletecar(ctx, key){
+        const buf = await ctx.stub.getState(key); // buffer
+        if( !buf || buf.length === 0){
+            throw new Error(`전달한 ${key} 정보가 존재하지 않습니다. `);
+        }
+        return await ctx.stub.deleteState(key);
+
+    }
+
+    //추가하기
+    async createCar(ctx, key, color, make, model, owner){
+        const obj = {
+            //  차량 정보를 이용해서 object로 생성
+            color : color,
+            make : make,
+            model : model,
+            owner : owner,
+        };
+        const str = JSON.stringify(obj);
+        const buf = Buffer.from(str);
+       return await ctx.stub.putState(key, buf);
+    }
+
     // 조건 검색 ex) 색상이 red인 차량(제조사를 원하는 것으로 리턴)
     async readQuery(ctx, make){
         var queryString = { }; // { }
