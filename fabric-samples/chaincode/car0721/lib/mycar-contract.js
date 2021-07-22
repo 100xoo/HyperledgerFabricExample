@@ -28,7 +28,9 @@ class MycarContract extends Contract {
                  console.log(res.value);
                  const str = res.value.value.toString(); // buffer -> stirng
                  const obj = JSON.parse(str); // string -> object
-                 allResults.push(obj);
+
+                 // 체인코드 수정
+                 allResults.push({KEY:res.value.key, VALUE:obj});
  
              }
              res = await iterator.next();
