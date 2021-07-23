@@ -4,13 +4,64 @@ var router = express.Router();
 //127.0.0.1:15984 윈도우 주소
 
 const nano = require('nano')('http://admin:adminpw@10.0.2.15:5984')//ubuntu에 저장돼있기 때문에 윈도우 주소 사용할 필요 없음
-const db = nano.db.use('member'); //couchdb의 member 페이지 이용
+//couchdb의 member 페이지 이용
 const db1 = nano.db.use('wallet');
 
 const FabricCAServices = require('fabric-ca-client');
 const { Wallets, Gateway} = require('fabric-network');
 const fs = require('fs');
 const path = require('path'); 
+
+router.post('/updateOwner', async function(req, res, next) {
+try {
+  const walletUser = req.body.userid; //<input type = "text" name="userid"
+  const car        = req.body.car; //<input type = "text" name="car"
+  const newOwner   = req.body.owner; //<input type = "text" name="owner"
+
+    //1. 환경설정 파일 읽기
+    const ccpPath = path.resolve (__dirname, '..', '..','fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
+    const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
+
+    // 2. wallet만들기( couchdb )
+    const dbUrl  = 'http://admin:adminpw@10.0.2.15:5984';
+    const dbName = 'wallet';
+    const wallet = await Wallets.newCouchDBWallet(dbUrl, dbName);
+
+    // 3. 이미 등록된 사용자 존재 확인
+    const userIdentity = await wallet.get(walletUser);
+    if( !userIdentity ) {
+      console.log(`${walletUser} 사용자가 없습니다.`);
+      res.redirect("/");
+      return;
+    }
+
+    // 4. 체인코드 호출을 위한 gateway 생성 및 접속
+    const gateway = new Gateway();
+    await gateway.connect(ccp, {
+          wallet, 
+          identity:walletUser, 
+          discovery:{enabled:true, asLocalhost:true} });
+    
+    // 5. 채널 선택
+    const network = await gateway.getNetwork('mychannel');
+
+    // 6. 체인코드 선택
+    const contract = await network.getContract('mycar');
+
+    // 7. 체인코드 updateOwner 호출 (데이터를 변경)
+    // async updateOwner(생략, key, newOwner)
+    await contract.submitTransaction('updateOwner', car, newOwner );
+
+    // 8. gateway 닫기
+    await gateway.disconnect();
+
+    // 9. 페이지 이동
+    res.redirect("/");    
+  }catch(error) {
+      console.log(error);
+      res.redirect("/");
+  }
+});
 
 router.get('/readQuerySelector', async function(req, res, next) {
   try {

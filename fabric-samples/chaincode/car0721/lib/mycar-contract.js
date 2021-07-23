@@ -9,6 +9,29 @@ const { Contract } = require('fabric-contract-api');
 class MycarContract extends Contract {
 
 
+    // 소유자 변경하기
+    async updateOwner(ctx, key, newOwner){
+        const buf = await ctx.stub.getState(key); // buffer
+        if( !buf || buf.length === 0){
+            throw new Error(`전달한 ${key} 정보가 존재하지 않습니다. `);
+        }
+
+        // 소유자 변경을 위해서 buffer -> string -> object로 변환
+        const str = buf.toString();
+        const obj = JSON.parse(str);
+        obj.owner = newOwner; // 소유자 변경
+
+        // 원장에 기록하기 위해서 object -> string -> buffer로 변환
+        const str1 = JSON.stringify(obj);
+        const buf1 = Buffer.from(str1);
+
+        // 이벤트 등록
+        ctx.stub.setEvent('updateOwner', buf1);
+        // 원장 변경
+        return await ctx.stub.putState(key, buf1);
+
+    }
+
     //{"selector":{"make":"Hyundai"}}
     //query => {"make":"Ford"}
     //query => [{"make":"Ford", "owner":"Tom"}]
@@ -42,16 +65,32 @@ class MycarContract extends Contract {
     }
 
     async deletecar(ctx, key){
+        //차량 정보 확인
         const buf = await ctx.stub.getState(key); // buffer
         if( !buf || buf.length === 0){
             throw new Error(`전달한 ${key} 정보가 존재하지 않습니다. `);
         }
+
+        // 이벤트 추가(삭제할때는 필요없음)
+        // const str = buf.toString(); // buffer -> string
+        // const obj = JSON.parse(str); // string -> object
+        // const str1 = JSON.stringify(obj); // string -> object
+        // const buf1 = Buffer.from(str1);
+
+        // 이벤트 발생
+        ctx.stub.setEvent('deletecar', buf); 
+        // 삭제
         return await ctx.stub.deleteState(key);
 
     }
 
     //추가하기
     async createCar(ctx, key, color, make, model, owner){
+        //차량 정보 확인
+        const buf = await ctx.stub.getState(key); // buffer
+        if( buf && buf.length > 0){
+            throw new Error(`전달한 ${key} 정보가 이미 있습니다.`);
+        }
         const obj = {
             //  차량 정보를 이용해서 object로 생성
             color : color,
@@ -59,9 +98,13 @@ class MycarContract extends Contract {
             model : model,
             owner : owner,
         };
+
+        // 원장 기록 obj->str->buf
         const str = JSON.stringify(obj);
-        const buf = Buffer.from(str);
-       return await ctx.stub.putState(key, buf);
+        const buf1 = Buffer.from(str);
+        // 이벤트 추가 ( 이벤트이름, 삭제한 자료)
+        ctx.stub.setEvent('createCar', buf1);
+       return await ctx.stub.putState(key, buf1);
     }
 
     // 조건 검색 ex) 색상이 red인 차량(제조사를 원하는 것으로 리턴)
@@ -92,7 +135,7 @@ class MycarContract extends Contract {
         await iterator.close();
         res = await iterator.next();
             
-        }
+    }
 
         // var queryString = { }; // { }
         // queryString.selector = { }; // {"selector" : { }}
