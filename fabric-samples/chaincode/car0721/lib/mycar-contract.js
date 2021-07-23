@@ -8,6 +8,29 @@ const { Contract } = require('fabric-contract-api');
 
 class MycarContract extends Contract {
 
+    // 차량 변경내역 조회(이력 조회)- 차량의 key 정보를 통해 확인
+    async retrieveHisory(ctx, key){
+        //차량 정보 확인
+        const buf1 = await ctx.stub.getState(key); // buffer
+        if( !buf1 || buf.length === 0){
+            throw new Error(`전달한 ${key} 정보가 존재하지 않습니다. `);
+        }
+        // 반복자
+        const iterator = await ctx.stub.getHistoryForKey(key); // 키를 이용해 정보 받아서 iterator에 보관
+        const allResults = [];
+        var res = await iterator.next();
+        while(!res.done){ // 읽은 내용이 있다면
+            if(res.value){
+                const buf = res.value.value; //buffer
+                const str = buf.toString(); //string
+                const obj = JSON.parse(str); //object
+                allResults({KEY:res.value.key, VALUE:obj});
+            }
+            res = await iterator.next(); // 1개 읽기
+        }
+        return allResults;
+    }
+
 
     // 소유자 변경하기
     async updateOwner(ctx, key, newOwner){
