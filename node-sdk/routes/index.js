@@ -12,6 +12,62 @@ const { Wallets, Gateway} = require('fabric-network');
 const fs = require('fs');
 const path = require('path'); 
 
+router.get('/retrieveHistory', async function(req, res, next) {
+  try {
+    // 0. 입력한 값 받기 ( GET 일 경우 req.query )
+    const walletUser = req.query.userid;
+    const car = req.query.car;
+
+    console.log(walletUser, car);
+
+    //1. 환경설정 파일 읽기
+    const ccpPath = path.resolve (__dirname, '..', '..','fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
+    const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
+
+    // 2. wallet만들기( couchdb )
+    const dbUrl  = 'http://admin:adminpw@10.0.2.15:5984';
+    const dbName = 'wallet';
+    const wallet = await Wallets.newCouchDBWallet(dbUrl, dbName);
+
+    // 3. 이미 등록된 사용자 존재 확인
+    const userIdentity = await wallet.get(walletUser);
+    if( !userIdentity ) {
+      console.log(`${walletUser} 사용자가 없습니다.`);
+      res.redirect("/");
+      return;
+    }
+
+    // 4. 체인코드 호출을 위한 gateway 생성 및 접속
+    const gateway = new Gateway();
+    await gateway.connect(ccp, {
+          wallet, 
+          identity:walletUser, 
+          discovery:{enabled:true, asLocalhost:true} });
+    
+    // 5. 채널 선택
+    const network = await gateway.getNetwork('mychannel');
+
+    // 6. 체인코드 선택
+    const contract = await network.getContract('mycar');
+
+    // 7. 체인코드 retrieveHistory 함수 호출 (데이터를 조회)
+    const result = await contract.evaluateTransaction('retrieveHistory', car); //조회
+    const str = result.toString(); // buffer -> string
+    const obj = JSON.parse(str);   // string -> object
+    console.log(obj);
+    
+    // 8. gateway 닫기
+    await gateway.disconnect();
+
+    //res.redirect("/")
+    res.render('readallcar', {rows : obj}); // readallcar.ejs로 전달하고 출력
+  }
+  catch(error){
+    console.error(error);
+    res.redirect("/");
+  }
+});
+
 router.post('/updateOwner', async function(req, res, next) {
 try {
   const walletUser = req.body.userid; //<input type = "text" name="userid"
