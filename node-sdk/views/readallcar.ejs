@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <title>Document</title>
+</head>
+<body>
+    <% for(let tmp of rows) {%>
+        키  : <%= tmp.KEY %>
+        색상  : <%= tmp.VALUE.color %>
+        제조사  : <%= tmp.VALUE.make %>
+        모델  : <%= tmp.VALUE.model %>
+        소유자  : <%= tmp.VALUE.owner %>
+        <br/><br/>
+    <% } %>
+</body>
+</html>

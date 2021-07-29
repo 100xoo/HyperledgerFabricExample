@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "myorderExists",
+        "transactionLabel": "A test myorderExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createMyorder",
+        "transactionLabel": "A test createMyorder transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readMyorder",
+        "transactionLabel": "A test readMyorder transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updateMyorder",
+        "transactionLabel": "A test updateMyorder transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deleteMyorder",
+        "transactionLabel": "A test deleteMyorder transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]
